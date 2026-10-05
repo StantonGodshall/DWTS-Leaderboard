@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DWTS Lab Leaderboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,700;1,6..96,500;1,6..96,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one column (max 960px). Standings first, then points per elimination, then results and each person's sheet. */
+:root {
+  --bg: #F2F3F8;
+  --surface: #FFFFFF;
+  --ink: #171B34;
+  --muted: #5A6082;
+  --line: #D9DCEA;
+  --gold: #C9970F;
+  --gold-soft: #FFF3C9;
+  --gold-fill: #F6CF4A;
+  --on-gold: #2E2200;
+  --gold-shine: linear-gradient(120deg, #B8860B 0%, #F4C430 38%, #FFE27A 52%, #D9A520 70%, #B8860B 100%);
+  --blue: #3242B5;
+  --miss: #C23D58;
+  --up: #1D7548;
+  --display: "Bodoni Moda", "Bodoni 72", Didot, Georgia, serif;
+  --body: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0E1124; --surface: #171B33; --ink: #ECEDF6; --muted: #A2A7C6; --line: #2C3154;
+    --gold: #F5C842; --gold-soft: #3A3112; --gold-fill: #F0C53C; --on-gold: #1F1700;
+    --gold-shine: linear-gradient(120deg, #E0A92A 0%, #FFD54F 38%, #FFF0A8 52%, #F2C230 70%, #E0A92A 100%);
+    --blue: #97A3FF; --miss: #F27E95; --up: #63CE97;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 0 16px;
+}
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding-block: 40px 72px;
+  display: grid;
+  gap: 48px;
+}
+h1, h2 { font-family: var(--display); font-weight: 700; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.05; letter-spacing: -0.01em; }
+h1 em, .rank.lead {
+  color: var(--gold);
+  background: var(--gold-shine); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+h1 em { font-style: italic; font-weight: 500; padding-right: 0.08em; }
+h2 { font-size: 1.6rem; line-height: 1.15; }
+p { margin: 0; }
+.eyebrow {
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+.top { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 760px) { .top { grid-template-columns: 1fr; } }
+.intro { display: grid; gap: 14px; max-width: 65ch; }
+
+/* gossip */
+.gossip {
+  display: grid; gap: 14px; padding: 18px 20px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  border-top: 3px solid var(--gold-fill);
+}
+.gossip-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.link-btn {
+  font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--blue);
+  background: none; border: 0; padding: 4px 0; cursor: pointer;
+}
+.link-btn:hover { text-decoration: underline; }
+.link-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.pokes { list-style: none; margin: 0; padding: 0; display: grid; }
+.pokes li {
+  font-family: var(--display); font-weight: 500; font-size: 1.05rem; line-height: 1.4;
+  padding: 10px 0; border-bottom: 1px solid var(--line); text-wrap: pretty;
+}
+.pokes li:first-child { padding-top: 0; }
+.facts { margin: 0; display: grid; gap: 12px; }
+.facts div { display: grid; gap: 2px; }
+.facts dt { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; font-weight: 600; }
+.facts dd small { display: block; font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+.lede { color: var(--muted); font-size: 1.02rem; }
+.status {
+  justify-self: start;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-weight: 600; font-size: 0.9rem;
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--gold-soft); color: var(--ink);
+}
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--gold-fill); }
+
+section { display: grid; gap: 16px; min-width: 0; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.note { color: var(--muted); font-size: 0.88rem; }
+
+.scroll { overflow-x: auto; min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+thead th {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  background: var(--surface);
+}
+.num { text-align: right; }
+
+/* standings */
+.standings td { padding-block: 12px; }
+.rank { font-family: var(--display); font-weight: 700; font-size: 1.35rem; width: 3.2em; color: var(--muted); }
+.rank.lead { color: var(--gold); }
+.who { font-weight: 600; font-size: 1.02rem; }
+.total { font-weight: 700; font-size: 1.15rem; }
+.week-pts { color: var(--muted); }
+.move { font-weight: 600; font-size: 0.85rem; width: 4.5em; }
+.move.up { color: var(--up); }
+.move.down { color: var(--miss); }
+.move.same { color: var(--muted); }
+tr.leader td { background: color-mix(in srgb, var(--gold-soft) 70%, transparent); }
+
+/* grid */
+.grid th.celeb { white-space: normal; min-width: 92px; vertical-align: bottom; text-transform: none; letter-spacing: 0; font-size: 0.8rem; color: var(--ink); }
+.grid th.celeb small { display: block; color: var(--muted); font-weight: 500; font-size: 0.72rem; }
+.grid td, .grid th { text-align: center; }
+.grid th:first-child, .grid td:first-child {
+  text-align: left; position: sticky; left: 0; background: var(--surface); z-index: 1; font-weight: 600;
+}
+.grid td.cell { font-weight: 600; }
+.grid td.cell.zero { color: var(--on-gold); }
+.grid td.total-col { font-weight: 700; border-left: 1px solid var(--line); }
+
+/* results */
+.results { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; }
+@media (max-width: 680px) { .results { grid-template-columns: 1fr; } }
+.out-list { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--line); }
+.out-list li {
+  display: grid; grid-template-columns: 4.2em minmax(0, 1fr) auto; gap: 12px; align-items: baseline;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.out-list .place { font-family: var(--display); font-weight: 700; font-size: 1.1rem; color: var(--muted); }
+.out-list .wk { color: var(--muted); font-size: 0.85rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 0.9rem; }
+.subhead { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.empty { color: var(--muted); padding: 14px 0; }
+
+/* sheet */
+.picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+select {
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 40px;
+}
+select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.sheet td.pending { color: var(--muted); font-style: italic; }
+.trophy {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--on-gold); background: var(--gold-fill); padding: 2px 8px; border-radius: 999px; margin-left: 8px;
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="intro">
+      <p class="eyebrow">Lab prediction pool · Dancing with the Stars</p>
+      <h1>DWTS Lab <em>Leaderboard</em></h1>
+      <p class="lede">Before the season, everyone ranked all 14 celebrities from first out to Mirrorball winner. Each time someone goes home, you score the number of places your pick was off. Lowest total leads.</p>
+      <p class="status" id="status"></p>
+    </div>
+    <aside class="gossip" aria-labelledby="h-gossip">
+      <div class="gossip-head">
+        <p class="eyebrow" id="h-gossip">Ballroom gossip</p>
+        <button type="button" class="link-btn" id="more-gossip">More gossip</button>
+      </div>
+      <ul class="pokes" id="pokes"></ul>
+      <dl class="facts" id="facts"></dl>
+    </aside>
+  </header>
+
+  <section aria-labelledby="h-standings">
+    <div class="sec-head">
+      <h2 id="h-standings">Standings</h2>
+      <p class="note" id="standings-note"></p>
+    </div>
+    <div class="scroll">
+      <table class="standings">
+        <thead><tr><th>Rank</th><th>Lab member</th><th class="num">Total</th><th class="num" id="wk-col">This week</th><th class="num">Move</th></tr></thead>
+        <tbody id="standings-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-grid">
+    <div class="sec-head">
+      <h2 id="h-grid">Points by elimination</h2>
+      <p class="note">Places off for each person on each celebrity sent home. Gold 0 means an exact call.</p>
+    </div>
+    <div id="grid-wrap"></div>
+  </section>
+
+  <section aria-labelledby="h-results">
+    <h2 id="h-results">The ballroom so far</h2>
+    <div class="results">
+      <div>
+        <p class="subhead">Elimination order</p>
+        <ol class="out-list" id="out-list"></ol>
+      </div>
+      <div>
+        <p class="subhead" id="still-head">Still dancing</p>
+        <div class="chips" id="still"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-sheet">
+    <div class="sec-head">
+      <h2 id="h-sheet">Prediction sheets</h2>
+      <div class="picker">
+        <label for="person" class="note">Show sheet for</label>
+        <select id="person"></select>
+      </div>
+    </div>
+    <div class="scroll">
+      <table class="sheet">
+        <thead><tr><th>Predicted</th><th>Celebrity</th><th>Actual</th><th class="num">Points</th></tr></thead>
+        <tbody id="sheet-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+// ============================================================
+//  RESULTS: add one line each week when someone goes home.
+//  Spell names exactly as in the cast list below.
+//
+//  Normal week:        { name: "Julia Stiles", week: 4 },
+//  Double elimination: two lines with the same week number.
+//  Finale:             { name: "Maura Higgins", week: 11, place: 1 },
+//                      (give each finalist their final place: 4, 3, 2, 1)
+// ============================================================
+const RESULTS = [
+  { name: "Giada De Laurentiis", week: 2 },
+  { name: "Taylor Hanson", week: 3 },
+];
+
+// Predictions from DWTS_predictions.xlsx, listed first out → winner.
+const PICKS = {
+  "Haylie":   ["Tatyana Ali","Giada De Laurentiis","Guillermo Rodriguez","Taylor Hanson","Jackson Olson","Julia Stiles","Ciara Miller","Tyler Cameron","Ezra Frech","Amber Glenn","Connor Wood","Jenna Dewan","Harry Shum Jr","Maura Higgins"],
+  "Josh":     ["Guillermo Rodriguez","Giada De Laurentiis","Tatyana Ali","Ciara Miller","Taylor Hanson","Tyler Cameron","Jackson Olson","Connor Wood","Julia Stiles","Amber Glenn","Ezra Frech","Jenna Dewan","Harry Shum Jr","Maura Higgins"],
+  "Michelle": ["Tatyana Ali","Guillermo Rodriguez","Giada De Laurentiis","Jackson Olson","Ciara Miller","Connor Wood","Taylor Hanson","Amber Glenn","Tyler Cameron","Jenna Dewan","Julia Stiles","Ezra Frech","Harry Shum Jr","Maura Higgins"],
+  "Devyn":    ["Tatyana Ali","Taylor Hanson","Giada De Laurentiis","Guillermo Rodriguez","Ciara Miller","Julia Stiles","Jenna Dewan","Jackson Olson","Tyler Cameron","Amber Glenn","Connor Wood","Ezra Frech","Maura Higgins","Harry Shum Jr"],
+  "Maggie":   ["Guillermo Rodriguez","Tatyana Ali","Connor Wood","Ciara Miller","Tyler Cameron","Taylor Hanson","Giada De Laurentiis","Jackson Olson","Harry Shum Jr","Jenna Dewan","Amber Glenn","Maura Higgins","Julia Stiles","Ezra Frech"],
+  "Brian":    ["Giada De Laurentiis","Tatyana Ali","Guillermo Rodriguez","Taylor Hanson","Tyler Cameron","Connor Wood","Maura Higgins","Julia Stiles","Harry Shum Jr","Ezra Frech","Ciara Miller","Amber Glenn","Jenna Dewan","Jackson Olson"],
+  "Ke":       ["Guillermo Rodriguez","Tatyana Ali","Ciara Miller","Jackson Olson","Giada De Laurentiis","Connor Wood","Julia Stiles","Tyler Cameron","Taylor Hanson","Maura Higgins","Amber Glenn","Harry Shum Jr","Ezra Frech","Jenna Dewan"],
+  "Olivia":   ["Tatyana Ali","Giada De Laurentiis","Connor Wood","Guillermo Rodriguez","Ciara Miller","Jackson Olson","Taylor Hanson","Julia Stiles","Tyler Cameron","Amber Glenn","Maura Higgins","Jenna Dewan","Ezra Frech","Harry Shum Jr"],
+  "Katy":     ["Guillermo Rodriguez","Taylor Hanson","Giada De Laurentiis","Harry Shum Jr","Tatyana Ali","Tyler Cameron","Ciara Miller","Jenna Dewan","Maura Higgins","Connor Wood","Ezra Frech","Jackson Olson","Julia Stiles","Amber Glenn"],
+  "Stanton":  ["Giada De Laurentiis","Tatyana Ali","Guillermo Rodriguez","Tyler Cameron","Taylor Hanson","Connor Wood","Ciara Miller","Jackson Olson","Jenna Dewan","Julia Stiles","Ezra Frech","Maura Higgins","Harry Shum Jr","Amber Glenn"],
+  "Non":      ["Guillermo Rodriguez","Jackson Olson","Tatyana Ali","Ciara Miller","Connor Wood","Giada De Laurentiis","Jenna Dewan","Taylor Hanson","Tyler Cameron","Amber Glenn","Julia Stiles","Maura Higgins","Ezra Frech","Harry Shum Jr"]
+};
+// Cast: Amber Glenn, Ciara Miller, Connor Wood, Ezra Frech, Giada De Laurentiis, Guillermo Rodriguez, Harry Shum Jr,
+//       Jackson Olson, Jenna Dewan, Julia Stiles, Maura Higgins, Tatyana Ali, Taylor Hanson, Tyler Cameron
+
+const N = 14;
+const PEOPLE = Object.keys(PICKS);
+const CAST = [...PICKS[PEOPLE[0]]].sort();
+// Column i of a sheet is the (i+1)th person out, i.e. place N - i.
+const PRED = {};
+for (const p of PEOPLE) { PRED[p] = {}; PICKS[p].forEach((c, i) => { PRED[p][c] = N - i; }); }
+
+const typos = RESULTS.filter((e) => !CAST.includes(e.name)).map((e) => e.name);
+const elims = RESULTS.filter((e) => CAST.includes(e.name) && Number.isFinite(e.week));
+
+const $ = (id) => document.getElementById(id);
+function el(tag, props, ...kids) {
+  const n = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v; else if (k === "text") n.textContent = v; else n.setAttribute(k, v);
+  }
+  for (const k of kids) if (k != null) n.append(k);
+  return n;
+}
+const ord = (n) => { const s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+const placeLabel = (places) => places.length === 1 ? ord(places[0]) : places.slice().sort((a, b) => a - b).map(ord).join("/");
+
+// Weekly exits fill places from the bottom (14th, 13th, ...) in week order.
+// A double elimination shares its places; each pick is scored against the closer one.
+function resolve(list) {
+  const out = {};
+  const regular = list.filter((e) => !e.place);
+  const weeks = [...new Set(regular.map((e) => e.week))].sort((a, b) => a - b);
+  let next = N;
+  for (const w of weeks) {
+    const group = regular.filter((e) => e.week === w);
+    const places = group.map((_, i) => next - i);
+    group.forEach((e) => { out[e.name] = { name: e.name, week: w, places, finale: false }; });
+    next -= group.length;
+  }
+  for (const e of list.filter((e) => e.place)) out[e.name] = { name: e.name, week: e.week, places: [e.place], finale: true };
+  return out;
+}
+const points = (person, r) => Math.min(...r.places.map((a) => Math.abs(PRED[person][r.name] - a)));
+
+function rankRows(totals) {
+  const sorted = PEOPLE.slice().sort((a, b) => totals[a] - totals[b] || a.localeCompare(b));
+  const rank = {};
+  sorted.forEach((p, i) => { rank[p] = i > 0 && totals[p] === totals[sorted[i - 1]] ? rank[sorted[i - 1]] : i + 1; });
+  return { sorted, rank };
+}
+
+function compute() {
+  const res = resolve(elims);
+  const out = Object.values(res).sort((a, b) => Math.max(...b.places) - Math.max(...a.places) || a.name.localeCompare(b.name));
+  const weeks = [...new Set(out.map((r) => r.week))].sort((a, b) => a - b);
+  const lastWeek = weeks[weeks.length - 1];
+  const totalsUpTo = (w) => {
+    const t = Object.fromEntries(PEOPLE.map((p) => [p, 0]));
+    for (const r of out) if (w == null || r.week <= w) for (const p of PEOPLE) t[p] += points(p, r);
+    return t;
+  };
+  const totals = totalsUpTo(null);
+  const prevWeek = weeks.length > 1 ? weeks[weeks.length - 2] : null;
+  const prevTotals = prevWeek != null ? totalsUpTo(prevWeek) : null;
+  const weekPts = Object.fromEntries(PEOPLE.map((p) => [p, out.filter((r) => r.week === lastWeek).reduce((s, r) => s + points(p, r), 0)]));
+  return { res, out, weeks, lastWeek, totals, prevRank: prevTotals ? rankRows(prevTotals).rank : null, weekPts, ...rankRows(totals) };
+}
+
+const c = compute();
+
+function renderBoard() {
+  const n = c.out.length;
+  $("status").textContent = typos.length
+    ? `Check the spelling in RESULTS: ${typos.join(", ")}`
+    : n === 0 ? "No eliminations yet"
+    : `After week ${c.lastWeek} · ${n} of ${N} eliminated`;
+  $("standings-note").textContent = n ? `${N - n} celebrities still dancing; their picks score when they go home.` : "";
+  $("wk-col").textContent = c.lastWeek != null ? `Week ${c.lastWeek}` : "This week";
+
+  // standings
+  $("standings-body").replaceChildren(...c.sorted.map((p) => {
+    const r = c.rank[p];
+    const tied = c.sorted.some((q) => q !== p && c.rank[q] === r);
+    let move = el("td", { class: "move same num", text: "–", "aria-label": "No change" });
+    if (c.prevRank) {
+      const d = c.prevRank[p] - r;
+      if (d > 0) move = el("td", { class: "move up num", text: `▲ ${d}`, "aria-label": `Up ${d}` });
+      if (d < 0) move = el("td", { class: "move down num", text: `▼ ${-d}`, "aria-label": `Down ${-d}` });
+    }
+    return el("tr", { class: n && r === 1 ? "leader" : "" },
+      el("td", { class: "rank" + (n && r === 1 ? " lead" : ""), text: (tied ? "T" : "") + r }),
+      el("td", { class: "who", text: p }),
+      el("td", { class: "total num", text: String(c.totals[p]) }),
+      el("td", { class: "week-pts num", text: n ? `+${c.weekPts[p]}` : "–" }),
+      move);
+  }));
+
+  // grid
+  const gw = $("grid-wrap");
+  if (!n) {
+    gw.replaceChildren(el("p", { class: "empty", text: "Scores appear here after the first elimination." }));
+  } else {
+    const head = el("tr", null, el("th", { text: "Lab member" }),
+      ...c.out.map((r) => el("th", { class: "celeb" }, r.name, el("small", { text: `${placeLabel(r.places)} · Wk ${r.week}` }))),
+      el("th", { class: "num", text: "Total" }));
+    const rows = c.sorted.map((p) => el("tr", null,
+      el("td", { text: p }),
+      ...c.out.map((r) => {
+        const v = points(p, r);
+        const td = el("td", { class: "cell" + (v === 0 ? " zero" : ""), text: String(v), title: `${p} picked ${r.name} for ${ord(PRED[p][r.name])}` });
+        td.style.background = v > 0
+          ? `color-mix(in srgb, var(--miss) ${Math.round(Math.min(v / 8, 1) * 32)}%, transparent)`
+          : "var(--gold-fill)";
+        return td;
+      }),
+      el("td", { class: "total-col", text: String(c.totals[p]) })));
+    gw.replaceChildren(el("div", { class: "scroll" }, el("table", { class: "grid" }, el("thead", null, head), el("tbody", null, ...rows))));
+  }
+
+  // results
+  $("out-list").replaceChildren(...(n ? c.out.map((r) => el("li", null,
+    el("span", { class: "place", text: placeLabel(r.places) }),
+    el("span", { text: r.name }),
+    el("span", { class: "wk", text: r.finale ? `Finale · Wk ${r.week}` : `Week ${r.week}` })))
+    : [el("li", { class: "empty", text: "Nobody has gone home yet." })]));
+  const still = CAST.filter((x) => !c.res[x]);
+  $("still-head").textContent = `Still dancing (${still.length})`;
+  $("still").replaceChildren(...still.map((x) => el("span", { class: "chip", text: x })));
+}
+
+function renderSheet() {
+  const who = $("person").value || PEOPLE[0];
+  $("sheet-body").replaceChildren(...PICKS[who].map((celeb) => {
+    const r = c.res[celeb];
+    const pred = PRED[who][celeb];
+    return el("tr", null,
+      el("td", { text: ord(pred) }),
+      el("td", null, celeb, pred === 1 ? el("span", { class: "trophy", text: "Mirrorball pick" }) : null),
+      r ? el("td", { text: placeLabel(r.places) }) : el("td", { class: "pending", text: "Still dancing" }),
+      el("td", { class: "num", text: r ? String(points(who, r)) : "–" }));
+  }));
+}
+
+// ---------- Ballroom gossip ----------
+// Lab members who can't be named "Most unique bracket".
+const NOT_UNIQUE = ["Katy"];
+const WORDS = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven"];
+const firstName = (x) => x.split(" ")[0];
+function who(list) {
+  if (list.length > 3) return `${WORDS[list.length] || list.length} of you`;
+  return list.length === 1 ? list[0] : list.slice(0, -1).join(", ") + " and " + list[list.length - 1];
+}
+const avgPlace = Object.fromEntries(CAST.map((x) => [x, PEOPLE.reduce((s, p) => s + PRED[p][x], 0) / PEOPLE.length]));
+
+const DANCES = ["cha-cha", "paso doble", "quickstep", "rumba", "jive", "foxtrot", "Viennese waltz", "samba", "tango", "salsa"];
+// Pick a wording variant from a key, so the same situation always reads the same way.
+function variant(key, options) {
+  let h = 0;
+  for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return options[h % options.length];
+}
+const are = (list) => (list.length > 1 ? "are" : "is");
+
+// Each poke has a type and a score. The panel leads with the best of each type, in ORDER.
+const ORDER = ["miss", "alive", "called", "busted", "leader", "move", "week", "fave", "cellar", "lone"];
+function buildPokes() {
+  const pokes = [];
+  const used = {};
+  // When the same set of wordings comes up twice, take the next unused one so lines don't repeat.
+  const add = (type, score, key, options) => {
+    const set = (used[type + ":" + options.length] ||= new Set());
+    let i = options.indexOf(variant(key, options));
+    for (let tries = 0; set.has(i) && tries < options.length; tries++) i = (i + 1) % options.length;
+    set.add(i);
+    pokes.push({ type, score, text: options[i] });
+  };
+
+  // Eliminated celebrities: the wildest misses and the exact calls.
+  for (const r of c.out) {
+    const C = r.name, F = firstName(C);
+    const actual = Math.min(...r.places);
+    const preds = PEOPLE.map((p) => PRED[p][C]);
+    const best = Math.min(...preds), worst = Math.max(...preds);
+    const exit = r.finale ? `finished ${ord(actual)}` : `went home in week ${r.week}`;
+    if (actual - best >= 4) {
+      const W = who(PEOPLE.filter((p) => PRED[p][C] === best));
+      add("miss", actual - best, C, best === 1 ? [
+        `${W} had ${C} winning the whole thing. ${F} ${exit}. Oof.`,
+        `${W} had ${C} hoisting the Mirrorball. ${F} ${exit}. Bracket in shambles.`,
+      ] : best <= 4 ? [
+        `${W} had ${C} in the finale. ${F} ${exit}. Not even close.`,
+        `${W} put ${C} in the final four. ${F} ${exit}. Ambitious.`,
+      ] : [
+        `${W} had ${C} finishing ${ord(best)}. ${F} ${exit}. Bold strategy.`,
+        `${W} saw ${C} as a ${ord(best)}-place contender. The voters did not.`,
+        `${W} had big plans for ${C}. ${F} ${exit}. So much for that.`,
+      ]);
+    }
+    if (worst - actual >= 4) {
+      const W = who(PEOPLE.filter((p) => PRED[p][C] === worst));
+      add("miss", worst - actual, C + "/low", [
+        `${W} had ${C} out in ${ord(worst)}. ${F} hung on until ${ord(actual)} out of pure spite.`,
+        `${W} gave ${C} no chance. ${F} lasted until ${ord(actual)}. Apologies are in order.`,
+      ]);
+    }
+    const exact = PEOPLE.filter((p) => points(p, r) === 0);
+    if (exact.length && exact.length <= 3) {
+      const W = who(exact);
+      const what = actual === 1 ? `${C} winning it all` : `${F}'s ${ord(actual)}-place exit`;
+      add("called", 4 - exact.length + (r.finale ? 5 : 0), C + "/called", [
+        `${W} called ${what} on the nose. Psychic?`,
+        `${W} nailed ${what}. Insider info has not been ruled out.`,
+        `${W} saw ${what} coming from a mile away. Chilling.`,
+      ]);
+    }
+  }
+
+  // Still dancing, though someone already had them gone.
+  const decided = N - c.out.length + 1;
+  for (const x of CAST.filter((x) => !c.res[x])) {
+    const doubters = PEOPLE.filter((p) => PRED[p][x] >= decided);
+    if (!doubters.length) continue;
+    const earliest = Math.max(...doubters.map((p) => PRED[p][x]));
+    const W = who(doubters.filter((p) => PRED[p][x] === earliest));
+    const F = firstName(x), when = earliest === N ? "first" : "early";
+    add("alive", earliest - decided + doubters.length, x + "/alive", [
+      `${W} wrote off ${x} ${when}. ${F} is still out there doing the ${variant(x, DANCES)}.`,
+      `${W} had ${x} gone by now. ${F} remains, unbothered.`,
+      `${W} counted ${x} out ${when}. ${F} keeps showing up anyway.`,
+    ]);
+  }
+
+  // Winner picks: busted ones, and lone believers still alive.
+  for (const champ of new Set(PEOPLE.map((p) => PICKS[p][N - 1]))) {
+    const backers = PEOPLE.filter((p) => PICKS[p][N - 1] === champ);
+    const r = c.res[champ];
+    if (r && Math.min(...r.places) > 1) {
+      add("busted", 6 + backers.length, champ + "/busted", [
+        `${who(backers)} picked ${champ} to win. ${firstName(champ)} is now watching from the couch.`,
+        `${who(backers)} had ${champ} winning it all. Pour one out for ${backers.length > 1 ? "those brackets" : "that bracket"}.`,
+      ]);
+    } else if (!r && backers.length === 1) {
+      add("lone", 1, champ + "/lone", [
+        `${backers[0]} is riding solo with ${champ} for the Mirrorball. Respect.`,
+        `Only ${backers[0]} has ${champ} winning it all. Lonely hill. Great view.`,
+      ]);
+    }
+  }
+
+  // The lab's favorites, gone too soon.
+  CAST.slice().sort((a, b) => avgPlace[a] - avgPlace[b]).slice(0, 3).forEach((x, i) => {
+    const r = c.res[x];
+    if (r && Math.min(...r.places) > 3) add("fave", 5 - i, x + "/fave", [
+      `${x}, a lab favorite, is out. Lab morale is at an all-time low.`,
+      `${x} was a lab favorite. Was. Collective grieving begins now.`,
+    ]);
+  });
+
+  // The standings themselves.
+  if (c.out.length) {
+    const w = c.lastWeek;
+    const leaders = c.sorted.filter((p) => c.rank[p] === 1);
+    add("leader", 3, "lead/" + leaders.join() + w, leaders.length === 1 ? [
+      `${leaders[0]} leads the lab and will absolutely bring it up at group meeting.`,
+      `${leaders[0]} is in first. The humility tour has not started.`,
+    ] : [
+      `${who(leaders)} are tied for first. Lab meeting is going to be tense.`,
+      `${who(leaders)} share the top spot. There can only be one.`,
+    ]);
+    const lastRank = Math.max(...PEOPLE.map((p) => c.rank[p]));
+    const cellar = c.sorted.filter((p) => c.rank[p] === lastRank);
+    if (cellar.length <= 3) add("cellar", 1, "cellar/" + cellar.join() + w, [
+      `${who(cellar)} ${are(cellar)} holding down last place. A comeback arc is narratively required.`,
+      `Last place: ${who(cellar)}. Plenty of season left. Probably.`,
+    ]);
+    const perfect = PEOPLE.filter((p) => c.weekPts[p] === 0);
+    if (perfect.length && perfect.length <= 3) add("week", 3, "perfect/" + w, [
+      `Week ${w}: ${who(perfect)} with a perfect zero. Tens from every judge.`,
+      `${who(perfect)} went flawless in week ${w}. Not a single point dropped.`,
+    ]);
+    const hi = Math.max(...PEOPLE.map((p) => c.weekPts[p]));
+    const ouch = PEOPLE.filter((p) => c.weekPts[p] === hi);
+    if (hi >= 5 && ouch.length <= 2) add("week", 2, "ouch/" + w, [
+      `${who(ouch)} gave up ${hi} points in week ${w}. The judges are holding up 3s.`,
+      `Rough night for ${who(ouch)}: ${hi} points in week ${w}. Brutal.`,
+    ]);
+    if (c.prevRank) {
+      const moves = PEOPLE.map((p) => ({ p, d: c.prevRank[p] - c.rank[p] }));
+      const up = Math.max(...moves.map((m) => m.d)), down = Math.min(...moves.map((m) => m.d));
+      if (up >= 2) add("move", up, "up/" + w, [
+        `${who(moves.filter((m) => m.d === up).map((m) => m.p))} jumped ${up} spots this week. Somebody check for an earpiece.`,
+        `${who(moves.filter((m) => m.d === up).map((m) => m.p))} climbed ${up} spots in one week. The comeback is on.`,
+      ]);
+      if (down <= -2) add("move", -down - 1, "down/" + w, [
+        `${who(moves.filter((m) => m.d === down).map((m) => m.p))} slid ${-down} spots this week. The ballroom giveth, the ballroom taketh away.`,
+        `${who(moves.filter((m) => m.d === down).map((m) => m.p))} dropped ${-down} spots. Tough week on the dance floor.`,
+      ]);
+    }
+  }
+
+  // Interleave: best of each type in ORDER, then the next best of each, and so on.
+  const queues = ORDER.map((t) => pokes.filter((k) => k.type === t).sort((a, b) => b.score - a.score)).filter((q) => q.length);
+  const out = [];
+  while (queues.some((q) => q.length)) for (const q of queues) if (q.length) out.push(q.shift());
+  return out.map((k) => k.text);
+}
+
+function buildFacts() {
+  const spread = CAST.map((x) => {
+    const ps = PEOPLE.map((p) => PRED[p][x]);
+    return { x, lo: Math.min(...ps), hi: Math.max(...ps), v: ps.reduce((s, q) => s + (q - avgPlace[x]) ** 2, 0) };
+  }).sort((a, b) => (b.hi - b.lo) - (a.hi - a.lo) || b.v - a.v)[0];
+  const hiFans = PEOPLE.filter((p) => PRED[p][spread.x] === spread.lo);
+  const loFans = PEOPLE.filter((p) => PRED[p][spread.x] === spread.hi);
+
+  const favs = CAST.slice().sort((a, b) => avgPlace[a] - avgPlace[b]).slice(0, 3);
+
+  const odd = PEOPLE.filter((p) => !NOT_UNIQUE.includes(p)).map((p) => {
+    const dev = CAST.map((x) => ({ x, d: PRED[p][x] - avgPlace[x] }));
+    const biggest = dev.sort((a, b) => Math.abs(b.d) - Math.abs(a.d))[0];
+    return { p, total: CAST.reduce((s, x) => s + Math.abs(PRED[p][x] - avgPlace[x]), 0), biggest };
+  }).sort((a, b) => b.total - a.total)[0];
+
+  return [
+    ["Most controversial", spread.x,
+      `Picked anywhere from ${ord(spread.lo)} (${who(hiFans)}) to ${ord(spread.hi)} (${who(loFans)})`],
+    ["Lab favorites", favs.join(", "),
+      "Average predicted place: " + favs.map((x) => avgPlace[x].toFixed(1)).join(", ")],
+    ["Most unique bracket", odd.p,
+      `Biggest swing: ${odd.biggest.x} in ${ord(PRED[odd.p][odd.biggest.x])} (lab average ${avgPlace[odd.biggest.x].toFixed(1)})`],
+  ];
+}
+
+const POKES = buildPokes();
+let pokeAt = 0;
+function renderPokes() {
+  const show = POKES.length ? Array.from({ length: Math.min(3, POKES.length) }, (_, i) => POKES[(pokeAt + i) % POKES.length])
+    : ["No drama yet. Give it a week."];
+  $("pokes").replaceChildren(...show.map((t) => el("li", { text: t })));
+  $("more-gossip").hidden = POKES.length <= 3;
+}
+$("more-gossip").addEventListener("click", () => { pokeAt = (pokeAt + 3) % POKES.length; renderPokes(); });
+$("facts").replaceChildren(...buildFacts().map(([k, v, sub]) => el("div", null, el("dt", { text: k }), el("dd", null, v, el("small", { text: sub })))));
+renderPokes();
+
+const personSel = $("person");
+personSel.replaceChildren(...PEOPLE.map((p) => el("option", { value: p, text: p })));
+try { const saved = localStorage.getItem("dwts-person"); if (saved && PICKS[saved]) personSel.value = saved; } catch (_) {}
+personSel.addEventListener("change", () => { try { localStorage.setItem("dwts-person", personSel.value); } catch (_) {} renderSheet(); });
+
+renderBoard();
+renderSheet();
+</script>
+</body>
+</html>
