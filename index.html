@@ -169,6 +169,97 @@ select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--on-gold); background: var(--gold-fill); padding: 2px 8px; border-radius: 999px; margin-left: 8px;
 }
+.status-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+
+/* finale awards: a deliberately dark ballroom stage in both themes */
+:root {
+  --aw-bg: rgba(9, 11, 28, 0.95);
+  --aw-ink: #F4F2EA;
+  --aw-muted: #AEB2CC;
+  --aw-card: #171B35;
+  --aw-line: #2E3358;
+  --aw-good: #F5C842;
+  --aw-bad: #FF8FA3;
+  --aw-on-step: #1B1606;
+  --medal-1: linear-gradient(160deg, #B8860B 0%, #F4C430 35%, #FFE58A 55%, #D9A520 80%, #A97A10 100%);
+  --medal-2: linear-gradient(160deg, #8E95A3 0%, #D5DAE3 40%, #F7F8FB 55%, #B9BFCB 85%, #8E95A3 100%);
+  --medal-3: linear-gradient(160deg, #8A5226 0%, #C98A55 40%, #EDB988 55%, #B67543 85%, #8A5226 100%);
+}
+.awards {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--aw-bg); color: var(--aw-ink);
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: calc(28px + env(safe-area-inset-top, 0px)) 16px calc(32px + env(safe-area-inset-bottom, 0px));
+}
+.awards-inner { max-width: 1000px; margin: 0 auto; display: grid; gap: 18px; justify-items: center; text-align: center; }
+.aw-eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--aw-good); }
+.awards h2 { font-size: clamp(2rem, 5.5vw, 3.4rem); line-height: 1.05; max-width: 20ch; }
+.awards h2 em {
+  font-style: italic; font-weight: 500; padding-right: 0.06em;
+  background: var(--medal-1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: var(--aw-good);
+}
+.aw-sub { color: var(--aw-muted); max-width: 56ch; font-size: 1.02rem; }
+.podium {
+  width: 100%; margin-top: 18px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 14px;
+}
+.spot { display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; min-width: 0; }
+.spot.pos-1 { order: 2; } .spot.pos-2 { order: 1; } .spot.pos-3 { order: 3; }
+.who-card {
+  background: var(--aw-card); border: 1px solid var(--aw-line); border-radius: 12px;
+  padding: 16px; text-align: left; display: grid; gap: 10px;
+  animation: aw-fade 0.6s ease-out both; animation-delay: calc(var(--d) + 0.55s);
+}
+.pos-1 .who-card { border-color: var(--aw-good); box-shadow: 0 0 0 1px var(--aw-good), 0 12px 40px rgba(245, 200, 66, 0.18); }
+.who-card .nm { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.1; }
+.who-card .pts { margin: 0; color: var(--aw-muted); font-size: 0.88rem; }
+.award { display: grid; gap: 2px; padding-top: 10px; border-top: 1px solid var(--aw-line); }
+.award .lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.award.good .lbl { color: var(--aw-good); }
+.award.bad .lbl { color: var(--aw-bad); }
+.award .celeb { font-weight: 600; font-size: 1rem; }
+.award .det { font-size: 0.82rem; color: var(--aw-muted); }
+.step {
+  display: grid; place-items: center; border-radius: 10px 10px 0 0;
+  font-family: var(--body); font-weight: 700; font-size: 3.2rem; letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums tabular-nums; color: var(--aw-on-step);
+  transform-origin: bottom; animation: aw-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--d);
+}
+.rank-1 .step { height: 170px; background: var(--medal-1); }
+.rank-2 .step { height: 120px; background: var(--medal-2); }
+.rank-3 .step { height: 90px; background: var(--medal-3); }
+.aw-close {
+  margin-top: 10px; font: inherit; font-weight: 600; cursor: pointer;
+  padding: 12px 22px; border-radius: 999px; border: 0;
+  background: var(--medal-1); color: var(--aw-on-step);
+}
+.aw-close:focus-visible { outline: 2px solid var(--aw-ink); outline-offset: 3px; }
+@keyframes aw-rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes aw-fade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (max-width: 700px) {
+  .podium { grid-template-columns: 1fr; gap: 18px; }
+  .spot.pos-1, .spot.pos-2, .spot.pos-3 { order: 0; }
+  .spot { flex-direction: column-reverse; }
+  .spot .step { height: 52px; font-size: 1.8rem; border-radius: 10px; transform-origin: left; }
+}
+.who-card .tb { margin: 0; font-size: 0.82rem; color: var(--aw-good); }
+.supers {
+  width: 100%; margin-top: 26px; display: grid; gap: 14px; text-align: left;
+  animation: aw-fade 0.6s ease-out both; animation-delay: 3.4s;
+}
+.supers h3 { margin: 0; text-align: center; font-family: var(--display); font-weight: 700; font-size: 1.7rem; }
+.supers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.super {
+  background: var(--aw-card); border: 1px solid var(--aw-line); border-radius: 12px;
+  padding: 14px 16px; display: grid; gap: 4px; align-content: start;
+}
+.super .lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--aw-good); }
+.super .val { font-weight: 700; font-size: 1.15rem; line-height: 1.3; }
+.super .val.many { font-size: 0.98rem; }
+.super .det { font-size: 0.85rem; color: var(--aw-muted); }
+@media (prefers-reduced-motion: reduce) {
+  .step, .who-card, .supers { animation: none; }
+}
 </style>
 </head>
 <body>
@@ -178,7 +269,10 @@ select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
       <p class="eyebrow">Lab prediction pool · Dancing with the Stars</p>
       <h1>DWTS Lab <em>Leaderboard</em></h1>
       <p class="lede">Before the season, everyone ranked all 14 celebrities from first out to Mirrorball winner. Each time someone goes home, you score the number of places your pick was off. Lowest total leads.</p>
-      <p class="status" id="status"></p>
+      <div class="status-row">
+        <p class="status" id="status"></p>
+        <button type="button" class="link-btn" id="replay-awards" hidden>Replay the awards</button>
+      </div>
     </div>
     <aside class="gossip" aria-labelledby="h-gossip">
       <div class="gossip-head">
@@ -201,6 +295,7 @@ select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
         <tbody id="standings-body"></tbody>
       </table>
     </div>
+    <p class="note">Tied on points? The tie goes to whoever has the higher exact call, counting down from the Mirrorball winner. Calling the winner beats everything.</p>
   </section>
 
   <section aria-labelledby="h-grid">
@@ -242,6 +337,22 @@ select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   </section>
 </main>
 
+<div class="awards" id="awards" role="dialog" aria-modal="true" aria-labelledby="awards-title" hidden>
+  <div class="awards-inner">
+    <p class="aw-eyebrow" id="aw-eyebrow">Season complete</p>
+    <h2 id="awards-title"></h2>
+    <p class="aw-sub" id="aw-sub"></p>
+    <div class="podium" id="podium"></div>
+    <section class="supers" id="supers-wrap" aria-labelledby="supers-title">
+      <h3 id="supers-title">Season superlatives</h3>
+      <div class="supers-grid" id="supers"></div>
+    </section>
+    <button type="button" class="aw-close" id="aw-close">See the final standings</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
 <script>
 // ============================================================
 //  RESULTS: add one line each week when someone goes home.
@@ -250,7 +361,9 @@ select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 //  Normal week:        { name: "Julia Stiles", week: 4 },
 //  Double elimination: two lines with the same week number.
 //  Finale:             { name: "Maura Higgins", week: 11, place: 1 },
-//                      (give each finalist their final place: 4, 3, 2, 1)
+//                      (give each finalist their final place: 5, 4, 3, 2, 1)
+//  Once all 14 have a place, the awards pop up for everyone who opens the page.
+//  To test the awards early, add #preview to the end of the link.
 // ============================================================
 const RESULTS = [
   { name: "Giada De Laurentiis", week: 2 },
@@ -291,6 +404,16 @@ for (const p of PEOPLE) { PRED[p] = {}; PICKS[p].forEach((c, i) => { PRED[p][c] 
 const typos = RESULTS.filter((e) => !CAST.includes(e.name)).map((e) => e.name);
 const elims = RESULTS.filter((e) => CAST.includes(e.name) && Number.isFinite(e.week));
 
+// #preview fills in a made-up finale (the lab's consensus order) so the awards can be tested early.
+const PREVIEW = location.hash === "#preview";
+if (PREVIEW) {
+  const gone = new Set(elims.map((e) => e.name));
+  const avg = (x) => PEOPLE.reduce((s, p) => s + PRED[p][x], 0);
+  const finaleWeek = Math.max(0, ...elims.map((e) => e.week)) + 1;
+  CAST.filter((x) => !gone.has(x)).sort((a, b) => avg(a) - avg(b))
+    .forEach((x, i) => elims.push({ name: x, week: finaleWeek, place: i + 1 }));
+}
+
 const $ = (id) => document.getElementById(id);
 function el(tag, props, ...kids) {
   const n = document.createElement(tag);
@@ -321,10 +444,24 @@ function resolve(list) {
 }
 const points = (person, r) => Math.min(...r.places.map((a) => Math.abs(PRED[person][r.name] - a)));
 
-function rankRows(totals) {
-  const sorted = PEOPLE.slice().sort((a, b) => totals[a] - totals[b] || a.localeCompare(b));
+// Tiebreaker: walk the finishes from the Mirrorball winner down. The first exact call
+// one person made and the other didn't settles it. Returns that result, or null if they match.
+function tiebreakOn(a, b, list) {
+  const byPlace = list.slice().sort((x, y) => Math.min(...x.places) - Math.min(...y.places));
+  return byPlace.find((r) => (points(a, r) === 0) !== (points(b, r) === 0)) || null;
+}
+function tiebreak(a, b, list) {
+  const r = tiebreakOn(a, b, list);
+  return r ? (points(a, r) === 0 ? -1 : 1) : 0;
+}
+
+function rankRows(totals, list) {
+  const sorted = PEOPLE.slice().sort((a, b) => totals[a] - totals[b] || tiebreak(a, b, list) || a.localeCompare(b));
   const rank = {};
-  sorted.forEach((p, i) => { rank[p] = i > 0 && totals[p] === totals[sorted[i - 1]] ? rank[sorted[i - 1]] : i + 1; });
+  sorted.forEach((p, i) => {
+    const prev = sorted[i - 1];
+    rank[p] = i > 0 && totals[p] === totals[prev] && !tiebreakOn(prev, p, list) ? rank[prev] : i + 1;
+  });
   return { sorted, rank };
 }
 
@@ -339,10 +476,14 @@ function compute() {
     return t;
   };
   const totals = totalsUpTo(null);
-  const prevWeek = weeks.length > 1 ? weeks[weeks.length - 2] : null;
-  const prevTotals = prevWeek != null ? totalsUpTo(prevWeek) : null;
+  // Standings after every week, for the movement arrows and the season superlatives.
+  const history = weeks.map((w) => {
+    const t = totalsUpTo(w);
+    return { week: w, totals: t, ...rankRows(t, out.filter((r) => r.week <= w)) };
+  });
+  const prevRank = history.length > 1 ? history[history.length - 2].rank : null;
   const weekPts = Object.fromEntries(PEOPLE.map((p) => [p, out.filter((r) => r.week === lastWeek).reduce((s, r) => s + points(p, r), 0)]));
-  return { res, out, weeks, lastWeek, totals, prevRank: prevTotals ? rankRows(prevTotals).rank : null, weekPts, ...rankRows(totals) };
+  return { res, out, weeks, lastWeek, totals, history, prevRank, weekPts, ...rankRows(totals, out) };
 }
 
 const c = compute();
@@ -351,9 +492,12 @@ function renderBoard() {
   const n = c.out.length;
   $("status").textContent = typos.length
     ? `Check the spelling in RESULTS: ${typos.join(", ")}`
+    : PREVIEW ? "Preview · the finale results here are made up"
     : n === 0 ? "No eliminations yet"
+    : n === N ? "Season complete · final standings"
     : `After week ${c.lastWeek} · ${n} of ${N} eliminated`;
-  $("standings-note").textContent = n ? `${N - n} celebrities still dancing; their picks score when they go home.` : "";
+  $("standings-note").textContent = n === N ? "Every pick has been scored."
+    : n ? `${N - n} celebrities still dancing; their picks score when they go home.` : "";
   $("wk-col").textContent = c.lastWeek != null ? `Week ${c.lastWeek}` : "This week";
 
   // standings
@@ -423,10 +567,8 @@ function renderSheet() {
 // ---------- Ballroom gossip ----------
 // Lab members who can't be named "Most unique bracket".
 const NOT_UNIQUE = ["Katy"];
-const WORDS = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven"];
 const firstName = (x) => x.split(" ")[0];
 function who(list) {
-  if (list.length > 3) return `${WORDS[list.length] || list.length} of you`;
   return list.length === 1 ? list[0] : list.slice(0, -1).join(", ") + " and " + list[list.length - 1];
 }
 const avgPlace = Object.fromEntries(CAST.map((x) => [x, PEOPLE.reduce((s, p) => s + PRED[p][x], 0) / PEOPLE.length]));
@@ -461,7 +603,8 @@ function buildPokes() {
     const preds = PEOPLE.map((p) => PRED[p][C]);
     const best = Math.min(...preds), worst = Math.max(...preds);
     const exit = r.finale ? `finished ${ord(actual)}` : `went home in week ${r.week}`;
-    if (actual - best >= 4) {
+    // A busted winner pick (best === 1) gets its own "busted" line below.
+    if (actual - best >= 4 && best > 1) {
       const W = who(PEOPLE.filter((p) => PRED[p][C] === best));
       add("miss", actual - best, C, best === 1 ? [
         `${W} had ${C} winning the whole thing. ${F} ${exit}. Oof.`,
@@ -629,6 +772,179 @@ personSel.addEventListener("change", () => { try { localStorage.setItem("dwts-pe
 
 renderBoard();
 renderSheet();
+
+// ---------- Finale awards ----------
+// "Edge" on a celebrity = the lab's average points on them minus this person's points.
+// A perfect call nobody else made scores high; a perfect call the whole lab made scores about zero.
+function edges(p) {
+  return c.out.map((r) => {
+    const mine = points(p, r);
+    const lab = PEOPLE.reduce((s, q) => s + points(q, r), 0) / PEOPLE.length;
+    return { r, mine, lab, edge: lab - mine };
+  }).sort((a, b) => b.edge - a.edge || a.mine - b.mine);
+}
+const fmt = (x) => (Math.round(x * 10) / 10).toString();
+function awardEl(label, kind, a, p) {
+  return el("div", { class: "award " + kind },
+    el("span", { class: "lbl", text: label }),
+    el("span", { class: "celeb", text: a.r.name }),
+    el("span", { class: "det", text: `Picked ${ord(PRED[p][a.r.name])}, finished ${placeLabel(a.r.places)}` }),
+    el("span", { class: "det", text: `${a.mine} off. The lab averaged ${fmt(a.lab)} off.` }));
+}
+
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CONFETTI_COLORS = ["#F5C842", "#FFE27A", "#D9A520", "#FFFFFF", "#D5DAE3", "#C98A55"];
+function burst(big) {
+  if (reduceMotion || typeof window.confetti !== "function") return;
+  const base = { colors: CONFETTI_COLORS, zIndex: 60, disableForReducedMotion: true };
+  if (!big) { confetti({ ...base, particleCount: 70, spread: 80, startVelocity: 35, origin: { y: 0.75 } }); return; }
+  confetti({ ...base, particleCount: 200, spread: 110, startVelocity: 50, origin: { y: 0.65 } });
+  timers.push(setTimeout(() => {
+    confetti({ ...base, particleCount: 90, angle: 60, spread: 70, origin: { x: 0, y: 0.75 } });
+    confetti({ ...base, particleCount: 90, angle: 120, spread: 70, origin: { x: 1, y: 0.75 } });
+  }, 300));
+}
+
+// Season superlatives: [label, who, detail] for the cards under the podium.
+function buildSupers() {
+  const items = [];
+  const byMost = (score) => {
+    const s = Object.fromEntries(PEOPLE.map((p) => [p, score(p)]));
+    const top = Math.max(...Object.values(s));
+    return { top, people: PEOPLE.filter((p) => s[p] === top) };
+  };
+
+  const winner = c.out.find((r) => r.places.length === 1 && r.places[0] === 1);
+  if (winner) {
+    const W = winner.name;
+    const callers = PEOPLE.filter((p) => PRED[p][W] === 1);
+    if (callers.length) {
+      items.push(["Called the Mirrorball", who(callers), `Had ${W} winning it all before the first dance.`]);
+    } else {
+      const best = Math.min(...PEOPLE.map((p) => PRED[p][W]));
+      items.push(["Called the Mirrorball", "Nobody",
+        `Closest: ${who(PEOPLE.filter((p) => PRED[p][W] === best))}, with ${W} in ${ord(best)}.`]);
+    }
+    const far = byMost((p) => PRED[p][W]);
+    items.push(["Furthest off on the winner", who(far.people), `Had ${W} finishing ${ord(far.top)}.`]);
+  }
+
+  // Comeback: the most points clawed back on the leader, from someone's worst week to the end.
+  const final = c.history[c.history.length - 1];
+  const behind = (h, p) => h.totals[p] - Math.min(...PEOPLE.map((q) => h.totals[q]));
+  const worstSpot = (p) => c.history.reduce((w, h) => (behind(h, p) > behind(w, p) ? h : w), c.history[0]);
+  const comeback = byMost((p) => behind(worstSpot(p), p) - behind(final, p));
+  if (comeback.top > 0) {
+    const p = comeback.people[0], h = worstSpot(p);
+    const end = c.rank[p] === 1 ? "Finished on top." : `Finished ${behind(final, p)} back, in ${ord(c.rank[p])}.`;
+    items.push(["Biggest comeback", who(comeback.people), comeback.people.length > 1
+      ? `Made up ${comeback.top} points on the leader.`
+      : `Was ${behind(h, p)} points behind first after week ${h.week}. ${end}`]);
+  }
+
+  const exact = byMost((p) => c.out.filter((r) => points(p, r) === 0).length);
+  if (exact.top > 0) items.push(["Most exact calls", who(exact.people), `${exact.top} of ${N} finishes called on the nose.`]);
+
+  const solo = c.out.slice().sort((a, b) => Math.min(...a.places) - Math.min(...b.places))
+    .find((r) => r !== winner && PEOPLE.filter((p) => points(p, r) === 0).length === 1);
+  if (solo) items.push(["Only one who saw it", PEOPLE.find((p) => points(p, solo) === 0),
+    `The lone exact call on ${solo.name} in ${placeLabel(solo.places)}.`]);
+
+  const miss = Math.max(...c.out.flatMap((r) => PEOPLE.map((p) => points(p, r))));
+  const missR = c.out.find((r) => PEOPLE.some((p) => points(p, r) === miss));
+  const missers = PEOPLE.filter((p) => points(p, missR) === miss);
+  items.push(["Wildest miss", who(missers), missers.length === 1
+    ? `Had ${missR.name} in ${ord(PRED[missers[0]][missR.name])}. Finished ${placeLabel(missR.places)}.`
+    : `${miss} places off on ${missR.name}, who finished ${placeLabel(missR.places)}.`]);
+
+  const firsts = byMost((p) => c.history.filter((h) => h.rank[p] === 1).length);
+  items.push(["Most weeks in first", who(firsts.people), `Led the lab after ${firsts.top} of ${c.history.length} weeks.`]);
+
+  const peakWeek = (p) => c.history.reduce((b, h) => (h.rank[p] < b.rank[p] ? h : b), c.history[0]);
+  const fade = byMost((p) => c.rank[p] - peakWeek(p).rank[p]);
+  if (fade.top >= 2) {
+    const p = fade.people[0], h = peakWeek(p);
+    items.push(["Peaked too early", who(fade.people), fade.people.length > 1
+      ? `Each fell ${fade.top} spots from their best week.`
+      : `${ord(h.rank[p])} after week ${h.week}. Finished ${ord(c.rank[p])}.`]);
+  }
+  return items;
+}
+
+const SEASON_DONE = c.out.length === N;
+const SEEN_KEY = "dwts-awards-seen:" + c.out.map((r) => r.name + placeLabel(r.places)).join("|");
+let timers = [];
+let lastFocus = null;
+
+function openAwards() {
+  const top = c.sorted.filter((p) => c.rank[p] <= 3);
+  const ranks = [...new Set(top.map((p) => c.rank[p]))];
+  const champs = top.filter((p) => c.rank[p] === ranks[0]);
+  const showWinner = c.out.find((r) => r.places.length === 1 && r.places[0] === 1);
+
+  $("aw-eyebrow").textContent = PREVIEW ? "Preview · made-up finale results" : "Season complete";
+  $("awards-title").replaceChildren("The lab's Mirrorball goes to ", el("em", { text: who(champs) }));
+  $("aw-sub").textContent = (showWinner ? `${showWinner.name} won the real one. ` : "")
+    + `${who(champs)} finished ${c.totals[champs[0]]} places off across the whole season.`;
+
+  // Reveal order: 3rd, then 2nd, then 1st.
+  const delay = [2.2, 1.2, 0.3];
+  $("podium").replaceChildren(...ranks.map((rk, gi) => {
+    const people = top.filter((p) => c.rank[p] === rk);
+    const spot = el("div", { class: `spot pos-${gi + 1} rank-${Math.min(rk, 3)}` });
+    spot.style.setProperty("--d", (reduceMotion ? 0 : delay[gi]) + "s");
+    for (const p of people) {
+      const e = edges(p);
+      const below = c.sorted[c.sorted.indexOf(p) + 1];
+      const tb = below && c.totals[below] === c.totals[p] ? tiebreakOn(p, below, c.out) : null;
+      spot.append(el("div", { class: "who-card" },
+        el("p", { class: "nm", text: p }),
+        el("p", { class: "pts", text: `${c.totals[p]} places off` }),
+        tb ? el("p", { class: "tb", text: `Beat ${below} on the tiebreaker by calling ${tb.name} in ${placeLabel(tb.places)}.` }) : null,
+        ...(gi === 0
+          ? [awardEl("Best call", "good", e[0], p), awardEl("Also nailed", "good", e[1], p)]
+          : [awardEl("Best call", "good", e[0], p), awardEl("Biggest miss", "bad", e[e.length - 1], p)])));
+    }
+    spot.append(el("div", { class: "step", "aria-hidden": "true", text: (people.length > 1 ? "T" : "") + rk }));
+    return spot;
+  }));
+
+  const supers = buildSupers();
+  $("supers-wrap").hidden = !supers.length;
+  $("supers").replaceChildren(...supers.map(([label, value, detail]) => el("div", { class: "super" },
+    el("span", { class: "lbl", text: label }),
+    el("span", { class: "val" + (value.split(/, | and /).length > 2 ? " many" : ""), text: value }),
+    el("span", { class: "det", text: detail }))));
+
+  lastFocus = document.activeElement;
+  $("awards").hidden = false;
+  $("awards").scrollTop = 0;
+  document.body.style.overflow = "hidden";
+  $("aw-close").focus({ preventScroll: true });
+  timers.forEach(clearTimeout);
+  timers = [setTimeout(() => burst(false), 400), setTimeout(() => burst(true), (delay[0] + 0.7) * 1000)];
+}
+
+function closeAwards() {
+  timers.forEach(clearTimeout);
+  timers = [];
+  if (typeof window.confetti === "function" && confetti.reset) confetti.reset();
+  $("awards").hidden = true;
+  document.body.style.overflow = "";
+  if (!PREVIEW) { try { localStorage.setItem(SEEN_KEY, "1"); } catch (_) {} }
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+
+$("aw-close").addEventListener("click", closeAwards);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("awards").hidden) closeAwards(); });
+$("replay-awards").addEventListener("click", openAwards);
+
+if (SEASON_DONE) {
+  $("replay-awards").hidden = false;
+  let seen = false;
+  try { seen = localStorage.getItem(SEEN_KEY) === "1"; } catch (_) {}
+  if (PREVIEW || !seen) openAwards();
+}
 </script>
 </body>
 </html>
